@@ -168,3 +168,4 @@ C:\Users\Simay\Documents\Gratas Projeler\VTYS-HastaneYonetimProje\backend\bin\De
 C:\Users\Simay\Documents\Gratas Projeler\VTYS-HastaneYonetimProje\backend\bin\Debug\net10.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\Simay\Documents\Gratas Projeler\VTYS-HastaneYonetimProje\backend\bin\Debug\net10.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\Simay\Documents\Gratas Projeler\VTYS-HastaneYonetimProje\backend\bin\Debug\net10.0\runtimes\win\lib\net9.0\System.Windows.Extensions.dll
+C:\Users\Simay\Documents\Gratas Projeler\VTYS-HastaneYonetimProje\backend\obj\Debug\net10.0\backend.sourcelink.json

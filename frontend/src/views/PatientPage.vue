@@ -6,31 +6,31 @@
             <div class="flex flex-col shadow-lg z-10">
                 <button 
                     @click="aktifTab = 1"
-                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white rounded-tl-lg cursor-pointer', aktifTab === 1 ? 'bg-blue' : 'bg-[#A6CBE7]']">
+                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white rounded-tl-lg cursor-pointer', aktifTab === 1 ? 'bg-blue' : 'bg-[#A6CBE7] hover:bg-[#86B9E0]']">
                     Randevu Al
                 </button>
                 
                 <button 
                     @click="aktifTab = 2"
-                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white cursor-pointer', aktifTab === 2 ? 'bg-blue' : 'bg-[#9CC4E2]']">
+                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white cursor-pointer', aktifTab === 2 ? 'bg-blue' : 'bg-[#9CC4E2] hover:bg-[#81B6DE]']">
                     Randevularım
                 </button>
                 
                 <button 
                     @click="aktifTab = 3"
-                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white cursor-pointer', aktifTab === 3 ? 'bg-blue' : 'bg-[#A6CBE7]']">
+                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white cursor-pointer', aktifTab === 3 ? 'bg-blue' : 'bg-[#A6CBE7] hover:bg-[#86B9E0]']">
                     Geçmiş Randevular
                 </button>
 
                 <button 
                     @click="aktifTab = 4"
-                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white cursor-pointer', aktifTab === 4 ? 'bg-blue' : 'bg-[#9CC4E2]']">
+                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white cursor-pointer', aktifTab === 4 ? 'bg-blue' : 'bg-[#9CC4E2] hover:bg-[#81B6DE]']">
                     Laboratuvar Sonuçlarım
                 </button>
 
                 <button 
                     @click="aktifTab = 5"
-                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white rounded-bl-lg cursor-pointer', aktifTab === 5 ? 'bg-blue' : 'bg-[#A6CBE7]']">
+                    :class="['h-12 w-[220px] text-center font-bold transition-colors text-white rounded-bl-lg cursor-pointer', aktifTab === 5 ? 'bg-blue' : 'bg-[#A6CBE7] hover:bg-[#86B9E0]']">
                     Faturalarım
                 </button>
             </div>
