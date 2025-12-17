@@ -1,0 +1,6 @@
+@import "../tailwind.config.css";
+
+body{
+    @apply font-inter;
+    background-color: #E0DDDD;
+}

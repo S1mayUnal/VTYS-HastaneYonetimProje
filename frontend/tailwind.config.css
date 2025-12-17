@@ -1,0 +1,14 @@
+/* tailwind.config.css - Proje kök dizininde */
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-blue: #66A8DA;
+  --color-green: #81AB4B;
+  --color-red: #BB5758;
+  --color-pink: #E4DDDD;
+  
+  /* Fonts */
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-bai: "Bai Jamjuree", sans-serif;
+}
