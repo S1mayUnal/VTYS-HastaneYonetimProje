@@ -21,8 +21,6 @@ namespace HastaneProje.Controllers
             _context = context;
         }
 
-        // 1. DOKTORLARI GETİR (Bölüm Adıyla Birlikte)
-        // 1. DOKTORLARI GETİR (Rehber için Telefon ve Email EKLENDİ)
         [HttpGet("doktorlar")]
         public async Task<ActionResult<IEnumerable<object>>> GetDoktorlar()
         {
@@ -43,52 +41,50 @@ namespace HastaneProje.Controllers
             return Ok(doktorlar);
         }
 
-        // YENİ: Yatan Hastaları Getir (Doktor Paneli İçin)
-        // YENİ: Yatan Hastaları ve Sorumlu Hemşireleri Getir
-[HttpGet("yatan-hastalar")]
-public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
-{
-    var yatanlar = await _context.Yatis
-        .Include(y => y.Hasta)
-        .Include(y => y.Oda)
-        .Where(y => y.cikis_tarihi == null)
-        .Select(y => new 
+        [HttpGet("yatan-hastalar")]
+        public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
         {
-            y.yatis_id,
-            y.giris_tarihi,
-            y.cikis_tarihi,
-            HastaAdSoyad = y.Hasta.ad + " " + y.Hasta.soyad,
-            OdaNo = y.Oda.oda_no,
-            
-            // Hemşireleri çeken kısım
-            Hemsireler = _context.Hemsire
-                .Where(h => _context.HastaBakim.Any(hb => hb.hemsire_id == h.hemsire_id && hb.yatis_id == y.yatis_id))
-                .Select(h => h.ad + " " + h.soyad)
-                .ToList()
-        })
-        .OrderByDescending(y => y.giris_tarihi)
-        .ToListAsync();
+            var yatanlar = await _context.Yatis
+                .Include(y => y.Hasta)
+                .Include(y => y.Oda)
+                .Where(y => y.cikis_tarihi == null)
+                .Select(y => new 
+                {
+                    y.yatis_id,
+                    y.giris_tarihi,
+                    y.cikis_tarihi,
+                    HastaAdSoyad = y.Hasta.ad + " " + y.Hasta.soyad,
+                    OdaNo = y.Oda.oda_no,
+                    
+                    // Hemşireleri çeken kısım
+                    Hemsireler = _context.Hemsire
+                        .Where(h => _context.HastaBakim.Any(hb => hb.hemsire_id == h.hemsire_id && hb.yatis_id == y.yatis_id))
+                        .Select(h => h.ad + " " + h.soyad)
+                        .ToList()
+                })
+                .OrderByDescending(y => y.giris_tarihi)
+                .ToListAsync();
 
-    return Ok(yatanlar);
-}
+            return Ok(yatanlar);
+        }
 
-        // 2. HASTALARI GETİR
+        
         [HttpGet("hastalar")]
         public async Task<ActionResult<IEnumerable<Hasta>>> GetHastalar()
         {
             return await _context.Hasta.ToListAsync();
         }
 
-        // 3. RANDEVULARI GETİR (Reçete Detayları ile)
+       
         [HttpGet("randevular")]
         public async Task<ActionResult<IEnumerable<object>>> GetRandevular()
         {
             var randevular = await _context.Randevu
                 .Include(r => r.Hasta)
                 .Include(r => r.Doktor)
-                .Include(r => r.Doktor.Bolum) // Doktorun bölümüne erişmek için
-                .Include(r => r.ReceteDetays) // Reçete detaylarını çek
-                    .ThenInclude(rd => rd.Ilac) // Her detayın ilaç ismini çek
+                .Include(r => r.Doktor.Bolum) 
+                .Include(r => r.ReceteDetays) 
+                    .ThenInclude(rd => rd.Ilac) 
                 .Select(r => new 
                 {
                     r.randevu_id,
@@ -102,9 +98,8 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
                     
                     HastaAdSoyad = r.Hasta.ad + " " + r.Hasta.soyad,
                     DoktorAdSoyad = r.Doktor.ad + " " + r.Doktor.soyad,
-                    Bolum = r.Doktor.Bolum.bolum_adi, // Yeni yapı
+                    Bolum = r.Doktor.Bolum.bolum_adi,
                     
-                    // Frontend'de reçeteyi liste olarak göstereceğiz
                     Ilaclar = r.ReceteDetays.Select(rd => new {
                         IlacAdi = rd.Ilac.ilac_adi,
                         Kullanim = rd.kullanim_sekli,
@@ -116,7 +111,6 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             return Ok(randevular);
         }
 
-        // 4. FATURALARI GETİR (YENİ)
         [HttpGet("faturalar/{hastaId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetFaturalar(int hastaId)
         {
@@ -131,7 +125,6 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
                     f.fatura_tarihi,
                     f.odeme_durumu,
                     f.odeme_yontemi,
-                    // Faturanın kaynağı (Randevu mu Yatış mı?)
                     Kaynak = f.randevu_id != null ? "Muayene Ücreti" : "Yatış Ücreti"
                 })
                 .OrderByDescending(f => f.fatura_tarihi)
@@ -140,20 +133,18 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             return Ok(faturalar);
         }
 
-        // YENİ: HASTANIN TAHLİL SONUÇLARINI GETİR
         [HttpGet("tahliller/{hastaId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetTahliller(int hastaId)
         {
-            // RandevuTahlil tablosu üzerinden sorgu yapıyoruz
-            // Randevu -> Tahlil ilişkisini kullanarak verileri çekiyoruz
-            var tahliller = await _context.Set<RandevuTahlil>() // DbSet<RandevuTahlil> tanımlı değilse Set<> kullanabiliriz
-                .Include(rt => rt.Randevu) // Randevu tarihine erişmek için
-                .Include(rt => rt.Tahlil)  // Tahlil adına erişmek için
+
+            var tahliller = await _context.Set<RandevuTahlil>() 
+                .Include(rt => rt.Randevu) 
+                .Include(rt => rt.Tahlil)  
                 .Where(rt => rt.Randevu.hasta_id == hastaId)
                 .Select(rt => new 
                 {
                     id = rt.id,
-                    tarih = rt.Randevu.randevu_tarihi, // Tahlil tarihi olarak randevu tarihini alıyoruz
+                    tarih = rt.Randevu.randevu_tarihi, 
                     tahlilAdi = rt.Tahlil.tahlil_adi,
                     sonuc = rt.sonuc
                 })
@@ -163,13 +154,11 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             return Ok(tahliller);
         }
 
-        // 5. NÖBETÇİLERİ GETİR (YENİ - Randevu alırken göstermek için)
         [HttpGet("nobetler")]
         public async Task<ActionResult<IEnumerable<object>>> GetNobetler()
         {
             var nobetler = await _context.Nobet
                 .Include(n => n.Doktor)
-                .Where(n => n.baslangic_zaman >= DateTime.Today) // Geçmiş nöbetlere gerek yok
                 .Select(n => new 
                 {
                     n.doktor_id,
@@ -182,12 +171,11 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             return Ok(nobetler);
         }
 
-        // 6. LOGIN İŞLEMİ
+
         [HttpPost("giris")]
         public async Task<IActionResult> GirisYap([FromBody] LoginModel model)
         {
-            // sp_GirisYap prosedüründe bir değişiklik yapmadıysak aynı kalabilir
-            // Ancak Entity Framework Core ile Raw SQL çalıştırırken parametre kullanımına dikkat
+
             var result = await _context.Database
                 .SqlQueryRaw<LoginResult>("EXEC sp_GirisYap @kullanici_adi={0}, @sifre={1}, @rol={2}", 
                     model.KullaniciAdi, model.Sifre, model.Rol)
@@ -201,7 +189,6 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             return Unauthorized("Kullanıcı adı veya şifre hatalı.");
         }
 
-        // 7. RANDEVU OLUŞTUR
         [HttpPost("randevu-olustur")]
         public IActionResult RandevuOlustur([FromBody] RandevuEkleDto model)
         {
@@ -215,7 +202,7 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
                     hasta_id = model.HastaId,
                     randevu_tarihi = model.RandevuTarihi,
                     randevu_durumu = "Aktif",
-                    randevu_saati = new TimeSpan(9, 0, 0) // Varsayılan saat
+                    randevu_saati = new TimeSpan(9, 0, 0)
                 };
 
                 _context.Randevu.Add(yeniRandevu);
@@ -230,7 +217,6 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             }
         }
 
-        // 1. İLAÇLARI GETİR (Dropdown için)
         [HttpGet("ilaclar")]
         public async Task<ActionResult<IEnumerable<object>>> GetIlaclar()
         {
@@ -246,23 +232,22 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
             return Ok(ilaclar);
         }
 
-        // 2. MUAYENE YAP (Tanı Gir ve Durumu Güncelle)
         [HttpPost("muayene-yap")]
         public async Task<IActionResult> MuayeneYap([FromBody] MuayeneTamamlaDto model)
         {
             var randevu = await _context.Randevu.FindAsync(model.randevu_id);
             if (randevu == null) return NotFound("Randevu bulunamadı.");
 
-            // Bilgileri güncelle
+
             randevu.tani = model.tani;
             randevu.muayene_tarihi = DateTime.Now;
-            randevu.randevu_durumu = "Tamamlandi"; // Durumu güncelle ki 'Geçmiş' sekmesine düşsün
+            randevu.randevu_durumu = "Tamamlandi"; 
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Muayene tamamlandı." });
         }
 
-        // 3. REÇETE EKLE (İlaç Yaz)
+
         [HttpPost("recete-ekle")]
         public async Task<IActionResult> ReceteEkle([FromBody] ReceteEkleDto model)
         {
@@ -278,7 +263,7 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
 
                 _context.ReceteDetay.Add(yeniReceteDetay);
                 
-                // İlaç stoktan düş (Opsiyonel ama mantıklı)
+
                 var ilac = await _context.Ilac.FindAsync(model.ilac_id);
                 if(ilac != null && ilac.stok_adedi > 0)
                 {
@@ -305,20 +290,18 @@ public async Task<ActionResult<IEnumerable<object>>> GetYatanHastalar()
     public class LoginResult {
         public int kullanici_id { get; set; }
         public string rol { get; set; }
-        public int? hasta_id { get; set; }   // Yeni eklendi (Null olabilir)
+        public int? hasta_id { get; set; }  
         public int? doktor_id { get; set; } 
         public string ad { get; set; }
         public string soyad { get; set; }
     }
 
     public class RandevuEkleDto {
-        // Klinik ID kaldırıldı, çünkü artık Doktor -> Bolum ilişkisi var
         [JsonPropertyName("doktor_id")] public int DoktorId { get; set; }
         [JsonPropertyName("hasta_id")] public int HastaId { get; set; }
         [JsonPropertyName("randevu_tarihi")] public DateTime RandevuTarihi { get; set; }
     }
 
-    // Frontend'den gelen verileri karşılamak için modeller
     public class MuayeneTamamlaDto
     {
         public int randevu_id { get; set; }
